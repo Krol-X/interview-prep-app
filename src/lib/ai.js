@@ -23,11 +23,12 @@ export const ai = reactive({
   keys: saved.keys || (saved.apiKey ? { gemini: saved.apiKey } : {}),       // provider -> key
   models: saved.models || (saved.model ? { gemini: saved.model } : {}),      // provider -> model override
   open: false,
+  width: +saved.width || 400,       // ширина панели на десктопе
   convs: JSON.parse(ls.get(CKEY) || '[]'),   // [{id, item, title, msgs:[{role,content}], at}]
   active: null,                                             // id активной беседы
 })
-export function saveAi() { ls.set(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models })) }
-watch(() => [ai.provider, ai.keys, ai.models], saveAi, { deep: true })
+export function saveAi() { ls.set(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models, width: ai.width })) }
+watch(() => [ai.provider, ai.keys, ai.models, ai.width], saveAi, { deep: true })
 
 export function saveConvs() {
   ai.convs.sort((a, b) => b.at - a.at); ai.convs.splice(60)

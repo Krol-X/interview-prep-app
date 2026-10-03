@@ -91,7 +91,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 </script>
 
 <template>
-  <div class="app">
+  <div class="app" :class="{ 'with-chat': ai.open && current }" :style="{ '--chat': ai.width + 'px' }">
     <div class="drawerbg" :class="{ show: drawerOpen }" @click="drawerOpen = false"></div>
     <Sidebar
       class="side" :class="{ open: drawerOpen }"

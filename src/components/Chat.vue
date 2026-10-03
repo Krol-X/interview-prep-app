@@ -64,11 +64,22 @@ function onKey(e) {
   if (e.key === 'Escape') { e.target.blur(); emit('close') }
 }
 const md = s => marked.parse(s)
+
+// перетаскивание левого края — ширина панели
+const grip = ref(false)
+function startResize(e) {
+  grip.value = true; document.body.classList.add('resizing')
+  const x0 = e.clientX, w0 = ai.width
+  const move = ev => { ai.width = Math.min(Math.max(300, w0 + (x0 - ev.clientX)), Math.round(window.innerWidth * 0.6)) }
+  const up = () => { grip.value = false; document.body.classList.remove('resizing'); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up) }
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up)
+}
 const when = t => { const d = new Date(t); return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }) }
 </script>
 
 <template>
   <aside class="chat" @keydown.stop>
+    <div class="cgrip" :class="{ on: grip }" @pointerdown.prevent="startResize"></div>
     <div class="ch">
       <span class="label">{{ cur().name }} · {{ model() }}</span>
       <span class="cbtns">
