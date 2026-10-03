@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar.vue'
 import ItemList from './components/ItemList.vue'
 import Detail from './components/Detail.vue'
 import Help from './components/Help.vue'
+import Chat from './components/Chat.vue'
+import { ai } from './lib/ai.js'
 
 const helpOpen = ref(false)
 const drawerOpen = ref(false)
@@ -59,6 +61,7 @@ async function doImport() {
 function onKey(e) {
   if (e.ctrlKey || e.metaKey || e.altKey) return
   if (helpOpen.value) { if (e.key === 'Escape' || e.key === '?') helpOpen.value = false; return }
+  if (e.target.tagName === 'TEXTAREA') return
   if (e.target.tagName === 'INPUT') { if (e.key === 'Escape') { e.target.blur(); store.query = '' } return }
   const k = e.key
   if (k === 'j' || k === 'ArrowDown') { step(1); e.preventDefault() }
@@ -72,9 +75,10 @@ function onKey(e) {
   else if (k === 'g') { if (visibleItems.value[0]) store.item = visibleItems.value[0].id }
   else if (k === 'G') { const l = visibleItems.value; if (l.length) store.item = l[l.length - 1].id }
   else if (k === '?') { helpOpen.value = true; e.preventDefault() }
-  else if (k === 'Escape') { if (drawerOpen.value) drawerOpen.value = false; else closeItem() }
+  else if (k === 'Escape') { if (ai.open) ai.open = false; else if (drawerOpen.value) drawerOpen.value = false; else closeItem() }
   else if (k === 'r') { if (confirm('Сбросить все отметки?')) reset() }
   else if (k === 'e') exportState()
+  else if (k === 'a') { if (current.value) ai.open = !ai.open }
   else if (k === 'i') doImport()
   else if (/^Digit[1-9]$/.test(e.code)) {
     const n = +e.code.slice(5) - 1 + (e.shiftKey ? 9 : 0)
@@ -104,7 +108,9 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
       :item="current" :done="current ? isDone(current.id) : false"
       :prev="visibleItems[visibleItems.findIndex(i => i.id === store.item) - 1] || null"
       :next="visibleItems[visibleItems.findIndex(i => i.id === store.item) + 1] || null"
-      @toggle="toggle(current.id)" @close="closeItem" @open="openItem" />
+      @toggle="toggle(current.id)" @close="closeItem" @open="openItem" @ask="ai.open = !ai.open" />
+
+    <Chat v-if="ai.open && current" :item="current" @close="ai.open = false" />
 
     <Help v-if="helpOpen" @close="helpOpen = false" @export="exportState()" @import="helpOpen = false; doImport()" :persistent="store.persistent" :count="Object.keys(store.done).length" />
   </div>

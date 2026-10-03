@@ -4,6 +4,10 @@ services:
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /zen/*
+        destination: https://opencode.ai/zen/*
     headers:
       - path: /*
         name: Cache-Control

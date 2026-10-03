@@ -1,4 +1,5 @@
 <script setup>
+import { ai, saveAi } from '../lib/ai.js'
 defineProps({ persistent: Boolean, count: Number })
 const emit = defineEmits(['close', 'export', 'import'])
 </script>
@@ -27,6 +28,7 @@ const emit = defineEmits(['close', 'export', 'import'])
         <tr><td><kbd>r</kbd></td><td>сбросить все отметки</td></tr>
         <tr><td><kbd>e</kbd></td><td>экспорт отметок в файл</td></tr>
         <tr><td><kbd>i</kbd></td><td>импорт из файла (объединяется с текущими)</td></tr>
+        <tr><td><kbd>a</kbd></td><td>спросить нейросеть по открытой карточке</td></tr>
       </table>
       <div class="io">
         <span class="label">Прогресс · {{ count }} отмечено</span>
@@ -34,6 +36,12 @@ const emit = defineEmits(['close', 'export', 'import'])
           <button @click="emit('export')">↓ экспорт</button>
           <button @click="emit('import')">↑ импорт</button>
         </span>
+      </div>
+      <div class="aiset" @keydown.stop>
+        <span class="label">Нейросеть · OpenCode Zen</span>
+        <input v-model.trim="ai.apiKey" type="password" placeholder="API key (opencode.ai → Keys)" @change="saveAi()" autocomplete="off">
+        <input v-model.trim="ai.model" placeholder="model" style="width:120px" @change="saveAi()">
+        <small>Ключ хранится только в этом браузере; запросы идут через <code>/zen/*</code> на opencode.ai.</small>
       </div>
       <div v-if="!persistent" class="mf">В превью отметки не сохраняются (sandbox).</div>
     </div>

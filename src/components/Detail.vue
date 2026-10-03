@@ -3,7 +3,7 @@ import { watch, ref } from 'vue'
 import { renderInline } from '../lib/content.js'
 
 const props = defineProps({ item: Object, done: Boolean, prev: Object, next: Object })
-const emit = defineEmits(['toggle', 'close', 'open'])
+const emit = defineEmits(['toggle', 'close', 'open', 'ask'])
 const body = ref(null)
 watch(() => props.item?.id, () => { if (body.value) body.value.scrollTop = 0 })
 const host = u => { try { return new URL(u).host.replace(/^www\./, '') } catch { return '' } }
@@ -18,6 +18,7 @@ const host = u => { try { return new URL(u).host.replace(/^www\./, '') } catch {
           <div class="crumb">{{ item.section.title }} <template v-if="item.sub">· {{ item.sub }}</template></div>
           <h1 v-html="renderInline(item.title)"></h1>
         </div>
+        <button class="dbtn" style="margin-right:6px" @click="emit('ask')" title="спросить нейросеть по карточке (a)">?</button>
         <button class="dbtn" :class="{ ok: done }" @click="emit('toggle')">
           <span class="box"></span>{{ done ? 'повторено' : 'отметить' }}
         </button>

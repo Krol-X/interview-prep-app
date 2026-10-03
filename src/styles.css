@@ -164,3 +164,22 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .io-btns { display: flex; gap: 6px; }
 .io button { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 3px 10px; color: var(--fg); background: none; cursor: pointer; }
 .io button:hover { border-color: var(--fg); }
+
+/* chat */
+.chat { position: fixed; right: 0; top: 0; bottom: 0; width: min(440px, 100vw); background: var(--bg); border-left: 1px solid var(--line); display: flex; flex-direction: column; z-index: 20; }
+.ch { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.cbtn { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 2px 8px; color: var(--fg); background: none; cursor: pointer; }
+.cbtn:hover { border-color: var(--fg); } .cbtn:disabled { opacity: .4; cursor: default; }
+.cquick { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--line); }
+.clog { flex: 1; overflow: auto; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; }
+.chint, .cerr { color: var(--mute); font-size: 12.5px; } .cerr { color: #b33; margin-top: 8px; white-space: pre-wrap; }
+.cmsg { margin-bottom: 12px; } .cmsg.user .ctext { background: var(--soft); border-radius: 4px; padding: 6px 10px; white-space: pre-wrap; }
+.cmsg.assistant .ctext > :first-child { margin-top: 0; } .cmsg.assistant .ctext > :last-child { margin-bottom: 0; }
+.cin { display: flex; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--line); align-items: flex-end; }
+.cin textarea { flex: 1; resize: none; font: 13.5px var(--sans); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; outline: none; }
+.cin textarea:focus { border-color: var(--mute); }
+.aiset { padding: 10px 16px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
+.aiset input { font: 12px var(--mono); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; outline: none; width: 100%; }
+.aiset .label { grid-column: 1 / -1; }
+.aiset small { grid-column: 1 / -1; color: var(--mute); font-size: 11.5px; }
+@media (max-width: 900px) { .chat { width: 100vw; } }
