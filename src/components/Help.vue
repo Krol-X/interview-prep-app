@@ -44,7 +44,7 @@ const emit = defineEmits(['close', 'export', 'import'])
         </select>
         <input v-model.trim="ai.models[ai.provider]" :placeholder="PROVIDERS[ai.provider].model" style="width:190px" @change="saveAi()" title="модель (пусто = по умолчанию)">
         <input v-model.trim="ai.keys[ai.provider]" type="password" :placeholder="'API key · ' + PROVIDERS[ai.provider].keys" @change="saveAi()" autocomplete="off" style="grid-column:1/-1">
-        <small>Бесплатные тиры: Gemini (лучше объясняет), Groq / Cerebras (быстрее всех), GitHub Models (есть GPT-4.1, но ~50–150 запросов/день). Ключи хранятся только в этом браузере; запросы идут через <code>/ai/*</code> прокси сайта.</small>
+        <small>Бесплатные тиры: Gemini (лучше объясняет), Groq / Cerebras (быстрее всех). Ключи хранятся только в этом браузере; запросы идут через <code>/ai/*</code> прокси сайта.</small>
       </div>
       <div v-if="!persistent" class="mf">В превью отметки не сохраняются (sandbox).</div>
     </div>

@@ -8,7 +8,6 @@ export const PROVIDERS = {
   groq:     { name: 'Groq',          base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile',   keys: 'console.groq.com/keys' },
   cerebras: { name: 'Cerebras',      base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',              keys: 'cloud.cerebras.ai' },
   mistral:  { name: 'Mistral',       base: '/ai/mistral/v1',           model: 'mistral-small-latest',      keys: 'console.mistral.ai/api-keys' },
-  github:   { name: 'GitHub Models', base: '/ai/github/inference',       model: 'openai/gpt-4.1-mini',       keys: 'github.com/settings/tokens (models:read)' },
   zen:      { name: 'OpenCode Zen',  base: '/ai/zen/v1',               model: 'deepseek-v4-flash',         keys: 'opencode.ai → Keys' },
 }
 export const ai = reactive({
