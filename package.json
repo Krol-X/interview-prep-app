@@ -1,0 +1,21 @@
+{
+  "name": "prep-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "scaffold": "node scripts/scaffold.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^5.4.2",
+    "marked": "^18.0.14",
+    "vue": "^3.5.43"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "vite": "^8.3.2"
+  }
+}
