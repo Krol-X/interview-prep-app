@@ -35,10 +35,7 @@ const emit = defineEmits(['close', 'export', 'import'])
           <button @click="emit('import')">↑ импорт</button>
         </span>
       </div>
-      <div class="mf">
-        Один пункт = один файл <code>content/&lt;раздел&gt;/&lt;пункт&gt;.md</code>. Точкой помечены важные (<code>hot: true</code>).
-        <template v-if="!persistent"><br>В превью отметки не сохраняются (sandbox).</template>
-      </div>
+      <div v-if="!persistent" class="mf">В превью отметки не сохраняются (sandbox).</div>
     </div>
   </div>
 </template>
