@@ -6,6 +6,7 @@ export const UPSTREAMS = {
   groq: 'https://api.groq.com',
   cerebras: 'https://api.cerebras.ai',
   mistral: 'https://api.mistral.ai',
+  github: 'https://models.github.ai',
   zen: 'https://opencode.ai/zen',
 }
 const proxy = Object.fromEntries(Object.entries(UPSTREAMS).map(([id, url]) => {
