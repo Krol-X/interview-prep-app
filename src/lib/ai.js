@@ -39,9 +39,13 @@ ${plain}
 
 // стриминг через OpenAI-совместимый chat/completions; onDelta(text) вызывается по мере прихода
 export async function chat(messages, onDelta, signal) {
-  const res = await fetch(`${cur().base}/chat/completions`, {
+  const key = apiKey()
+  // ключ дублируем: Authorization (прод), x-prep-key (dev-прокси превращает в Authorization — превью режет Authorization),
+  // ?key= — для Google, который принимает ключ и в query
+  const url = `${cur().base}/chat/completions` + (ai.provider === 'gemini' ? `?key=${encodeURIComponent(key)}` : '')
+  const res = await fetch(url, {
     method: 'POST', signal,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey()}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, 'x-prep-key': key },
     body: JSON.stringify({ model: model(), messages, stream: true }),
   })
   if (!res.ok) {
