@@ -1,5 +1,5 @@
 <script setup>
-import { ai, saveAi } from '../lib/ai.js'
+import { ai } from '../lib/ai.js'
 defineProps({ persistent: Boolean, count: Number })
 const emit = defineEmits(['close', 'export', 'import'])
 </script>
@@ -39,8 +39,8 @@ const emit = defineEmits(['close', 'export', 'import'])
       </div>
       <div class="aiset" @keydown.stop>
         <span class="label">Gemini</span>
-        <input v-model.trim="ai.apiKey" type="password" placeholder="API key · aistudio.google.com/apikey" @change="saveAi()" autocomplete="off">
-        <input v-model.trim="ai.model" placeholder="gemini-3.5-flash-lite" style="width:190px" @change="saveAi()" title="модель (пусто = по умолчанию)">
+        <input v-model.trim="ai.apiKey" type="password" placeholder="API key · aistudio.google.com/apikey" autocomplete="off">
+        <input v-model.trim="ai.model" placeholder="gemini-3.5-flash-lite" style="width:190px" title="модель (пусто = по умолчанию)">
       </div>
       <div v-if="!persistent" class="mf">В превью отметки не сохраняются (sandbox).</div>
     </div>

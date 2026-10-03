@@ -1,4 +1,5 @@
 import { reactive, watch } from 'vue'
+import { ai } from './ai.js'
 
 const KEY = 'prep-v2'
 const mem = {}
@@ -35,7 +36,7 @@ export function reset() { store.done = {} }
 
 // ── экспорт / импорт прогресса в файл ──
 export function exportState() {
-  const data = { app: 'prep', v: 2, exported: new Date().toISOString(), done: store.done, hotOnly: store.hotOnly, hideDone: store.hideDone }
+  const data = { app: 'prep', v: 2, exported: new Date().toISOString(), done: store.done, hotOnly: store.hotOnly, hideDone: store.hideDone, ai: { apiKey: ai.apiKey, model: ai.model } }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
@@ -57,6 +58,7 @@ export function importState(mode = 'merge') {
         if (data.app !== 'prep' || typeof data.done !== 'object') throw new Error('not a prep file')
         const before = Object.keys(store.done).length
         store.done = mode === 'replace' ? { ...data.done } : { ...store.done, ...data.done }
+        if (data.ai?.apiKey) { ai.apiKey = data.ai.apiKey; ai.model = data.ai.model || '' }
         resolve({ before, after: Object.keys(store.done).length, imported: Object.keys(data.done).length })
       } catch (e) { resolve({ error: e.message }) }
     }

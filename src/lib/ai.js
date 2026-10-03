@@ -1,7 +1,12 @@
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
 const KEY = 'prep-ai'
-const saved = JSON.parse(localStorage.getItem(KEY) || '{}')
+const mem = {}
+const ls = {   // localStorage может быть недоступен (sandbox-iframe) — тогда держим в памяти
+  get(k) { try { return localStorage.getItem(k) } catch { return mem[k] ?? null } },
+  set(k, v) { try { localStorage.setItem(k, v) } catch { mem[k] = v } },
+}
+const saved = JSON.parse(ls.get(KEY) || '{}')
 // /ai/gemini/* проксируется на generativelanguage.googleapis.com (render.yaml routes + vite proxy)
 const BASE = '/ai/gemini/v1beta/openai'
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
@@ -11,13 +16,15 @@ export const ai = reactive({
   apiKey: saved.apiKey || saved.keys?.gemini || '',
   model: saved.model || saved.models?.gemini || '',
   open: false,
-  convs: JSON.parse(localStorage.getItem(CKEY) || '[]'),   // [{id, item, title, msgs:[{role,content}], at}]
+  convs: JSON.parse(ls.get(CKEY) || '[]'),   // [{id, item, title, msgs:[{role,content}], at}]
   active: null,                                             // id активной беседы
 })
-export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ apiKey: ai.apiKey, model: ai.model })) }
+export function saveAi() { ls.set(KEY, JSON.stringify({ apiKey: ai.apiKey, model: ai.model })) }
+watch(() => [ai.apiKey, ai.model], saveAi)
+
 export function saveConvs() {
   ai.convs.sort((a, b) => b.at - a.at); ai.convs.splice(60)
-  localStorage.setItem(CKEY, JSON.stringify(ai.convs))
+  ls.set(CKEY, JSON.stringify(ai.convs))
 }
 export const apiKey = () => (ai.apiKey || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок — только печатные ASCII
 export const model = () => ai.model || DEFAULT_MODEL
