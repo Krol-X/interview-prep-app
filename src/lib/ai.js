@@ -12,7 +12,7 @@ export const PROVIDERS = {
   gemini:   { name: 'Gemini',   base: '/ai/gemini/v1beta/openai', model: 'gemini-3.5-flash-lite',   keys: 'aistudio.google.com/apikey' },
   groq:     { name: 'Groq',     base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile', keys: 'console.groq.com/keys' },
   cerebras: { name: 'Cerebras', base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',            keys: 'cloud.cerebras.ai' },
-  mistral:  { name: 'Mistral',  base: '/ai/mistral/v1',           model: 'mistral-small-latest',    keys: 'console.mistral.ai/api-keys' },
+  mistral:  { name: 'Mistral',  base: '/ai/mistral/v1',           model: 'ministral-14b-latest',     keys: 'console.mistral.ai/api-keys' },
 }
 const CKEY = 'prep-ai-convs'
 
