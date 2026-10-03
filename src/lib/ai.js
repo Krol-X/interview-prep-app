@@ -82,8 +82,11 @@ export async function chat(messages, onDelta, signal) {
     } catch {}
     throw new Error(msg)
   }
+  const ct = res.headers.get('content-type') || ''
+  if (!res.body || (!ct.includes('event-stream') && !ct.includes('json')))
+    throw new Error('пустой ответ от /ai/* — на хостинге не настроен rewrite-прокси к API (Render → Settings → Redirects/Rewrites)')
   const reader = res.body.getReader(), dec = new TextDecoder()
-  let buf = ''
+  let buf = '', got = false
   for (;;) {
     const { value, done } = await reader.read()
     if (done) break
@@ -93,11 +96,12 @@ export async function chat(messages, onDelta, signal) {
       const s = l.trim()
       if (!s.startsWith('data:')) continue
       const data = s.slice(5).trim()
-      if (data === '[DONE]') return
+      if (data === '[DONE]') { if (!got) throw new Error('модель вернула пустой ответ'); return }
       try {
         const d = JSON.parse(data).choices?.[0]?.delta
-        if (d?.content) onDelta(d.content)
+        if (d?.content) { got = true; onDelta(d.content) }
       } catch {}
     }
   }
+  if (!got) throw new Error('модель вернула пустой ответ')
 }

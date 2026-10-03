@@ -51,7 +51,7 @@ async function send() {
   busy.value = true; ctrl = new AbortController(); scroll()
   try {
     const ctxItem = allItems.find(i => i.id === c.item) || props.item
-    const history = [{ role: 'system', content: systemPrompt(ctxItem) }, ...c.msgs.slice(0, -1)]
+    const history = [{ role: 'system', content: systemPrompt(ctxItem) }, ...c.msgs.slice(0, -1).filter(m => m.content)]
     await chat(history, d => { reply.content += d; scroll() }, ctrl.signal)
   } catch (e) {
     if (e.name !== 'AbortError') err.value = e.message
