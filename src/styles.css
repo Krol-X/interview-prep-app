@@ -136,28 +136,31 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 
 /* mobile */
 .menu, .back, .drawerbg { display: none; }
-@media (max-width: 900px) {
-  .app { grid-template-columns: var(--side) 1fr; }
-  .list, .detail { grid-column: 2; grid-row: 1; }
+/* laptop / планшет (≤1024): разделы в выдвижном меню, список и карточка по очереди */
+@media (max-width: 1024px) {
+  .app { grid-template-columns: 1fr; }
+  .list, .detail { grid-column: 1; grid-row: 1; }
   .detail:not(.open) { display: none; }
   .list.covered { display: none; }
   .back { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 4px; flex: none; }
   .dhead { padding: 14px 16px 10px; }
   .dbody { padding: 4px 16px 48px; }
-}
-@media (max-width: 640px) {
-  .app { grid-template-columns: 1fr; height: 100dvh; }
-  .list, .detail { grid-column: 1; }
-  .side { position: fixed; inset: 0 20% 0 0; max-width: 340px; z-index: 20; background: var(--bg); transform: translateX(-100%); transition: transform .2s; padding-top: env(safe-area-inset-top); }
+  .side { position: fixed; inset: 0 auto 0 0; width: var(--side); z-index: 20; background: var(--bg); transform: translateX(-100%); transition: transform .2s; border-right: 1px solid var(--line); }
   .side.open { transform: none; }
   .drawerbg { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 15; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .drawerbg.show { opacity: 1; pointer-events: auto; }
+  .menu { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 4px; flex: none; }
+  .menu i { display: block; width: 14px; height: 1.5px; background: var(--fg); box-shadow: 0 -4.5px 0 var(--fg), 0 4.5px 0 var(--fg); }
+  .lhead { align-items: center; }
+}
+@media (max-width: 640px) {
+  .app { height: 100dvh; }
+  .side { inset: 0 20% 0 0; width: auto; max-width: 340px; padding-top: env(safe-area-inset-top); }
   .sec { padding: 11px 18px 11px 16px; font-size: 15px; }
   .search { padding: 9px 10px; font-size: 16px; }
   .toggle { padding: 7px 8px; font-size: 14px; }
-  .menu { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 4px; flex: none; }
-  .menu i { display: block; width: 14px; height: 1.5px; background: var(--fg); box-shadow: 0 -4.5px 0 var(--fg), 0 4.5px 0 var(--fg); }
-  .lhead { padding: calc(10px + env(safe-area-inset-top)) 12px 10px; align-items: center; }
+  .menu { width: 32px; height: 32px; }
+  .lhead { padding: calc(10px + env(safe-area-inset-top)) 12px 10px; }
   .lhead h2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rows { padding: 4px 8px calc(24px + env(safe-area-inset-bottom)); }
   .row { padding: 11px 8px; gap: 12px; font-size: 15px; }
@@ -195,10 +198,8 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .aiset input { font: 12px var(--mono); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; outline: none; width: 100%; }
 .aiset .label { grid-column: 1 / -1; }
 .aiset small { grid-column: 1 / -1; color: var(--mute); font-size: 11.5px; }
-@media (max-width: 900px) { .chat { position: fixed; inset: 0; z-index: 20; } .cgrip { display: none; } }
-/* планшет: чат во весь экран, раскладка под ним обычная (разделы + список/карточка) */
-@media (min-width: 641px) and (max-width: 900px) { .app.with-chat { grid-template-columns: var(--side) 1fr; } .app.with-chat .side { position: static; transform: none; width: auto; } .app.with-chat .drawerbg, .app.with-chat .menu { display: none; } }
-@media (max-width: 640px) { .app.with-chat { grid-template-columns: 1fr; } }
+/* ≤1024: чат во весь экран поверх */
+@media (max-width: 1024px) { .chat { position: fixed; inset: 0; z-index: 20; } .cgrip { display: none; } .app.with-chat { grid-template-columns: 1fr; } }
 
 .cbtns { display: flex; gap: 6px; } .cbtn.on { border-color: var(--fg); }
 .csend { font-size: 15px; line-height: 1; padding: 6px 10px; } .csend.stop { color: #b33; border-color: #b33; }
