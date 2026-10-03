@@ -7,27 +7,33 @@ const ls = {   // localStorage может быть недоступен (sandbox
   set(k, v) { try { localStorage.setItem(k, v) } catch { mem[k] = v } },
 }
 const saved = JSON.parse(ls.get(KEY) || '{}')
-// /ai/gemini/* проксируется на generativelanguage.googleapis.com (render.yaml routes + vite proxy)
-const BASE = '/ai/gemini/v1beta/openai'
-const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
+// /ai/<id>/* проксируется на upstream (render.yaml routes + vite proxy)
+export const PROVIDERS = {
+  gemini:   { name: 'Gemini',   base: '/ai/gemini/v1beta/openai', model: 'gemini-3.5-flash-lite',   keys: 'aistudio.google.com/apikey' },
+  groq:     { name: 'Groq',     base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile', keys: 'console.groq.com/keys' },
+  cerebras: { name: 'Cerebras', base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',            keys: 'cloud.cerebras.ai' },
+  mistral:  { name: 'Mistral',  base: '/ai/mistral/v1',           model: 'mistral-small-latest',    keys: 'console.mistral.ai/api-keys' },
+}
 const CKEY = 'prep-ai-convs'
 
 export const ai = reactive({
-  apiKey: saved.apiKey || saved.keys?.gemini || '',
-  model: saved.model || saved.models?.gemini || '',
+  provider: PROVIDERS[saved.provider] ? saved.provider : 'gemini',
+  keys: saved.keys || (saved.apiKey ? { gemini: saved.apiKey } : {}),       // provider -> key
+  models: saved.models || (saved.model ? { gemini: saved.model } : {}),      // provider -> model override
   open: false,
   convs: JSON.parse(ls.get(CKEY) || '[]'),   // [{id, item, title, msgs:[{role,content}], at}]
   active: null,                                             // id активной беседы
 })
-export function saveAi() { ls.set(KEY, JSON.stringify({ apiKey: ai.apiKey, model: ai.model })) }
-watch(() => [ai.apiKey, ai.model], saveAi)
+export function saveAi() { ls.set(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models })) }
+watch(() => [ai.provider, ai.keys, ai.models], saveAi, { deep: true })
 
 export function saveConvs() {
   ai.convs.sort((a, b) => b.at - a.at); ai.convs.splice(60)
   ls.set(CKEY, JSON.stringify(ai.convs))
 }
-export const apiKey = () => (ai.apiKey || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок — только печатные ASCII
-export const model = () => ai.model || DEFAULT_MODEL
+export const cur = () => PROVIDERS[ai.provider]
+export const apiKey = () => (ai.keys[ai.provider] || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок — только печатные ASCII
+export const model = () => ai.models[ai.provider] || cur().model
 
 export function newConv(item) {
   const c = { id: Date.now().toString(36), item: item.id, title: '', msgs: [], at: Date.now() }
@@ -62,7 +68,7 @@ ${plain}
 export async function chat(messages, onDelta, signal) {
   const key = apiKey()
   // ключ дублируем: Authorization (прод), x-prep-key (dev-прокси превращает его в Authorization — превью режет Authorization)
-  const url = `${BASE}/chat/completions`
+  const url = `${cur().base}/chat/completions`
   const res = await fetch(url, {
     method: 'POST', signal,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, 'x-prep-key': key },

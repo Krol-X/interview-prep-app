@@ -2,7 +2,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { marked } from 'marked'
 import { allItems, renderInline } from '../lib/content.js'
-import { ai, chat, systemPrompt, model, apiKey, newConv, activeConv, deleteConv, saveConvs } from '../lib/ai.js'
+import { ai, chat, systemPrompt, model, apiKey, cur, newConv, activeConv, deleteConv, saveConvs } from '../lib/ai.js'
 
 const props = defineProps({ item: Object })
 const emit = defineEmits(['close', 'open'])
@@ -41,7 +41,7 @@ function remove(c) { deleteConv(c.id) }
 async function send() {
   const text = input.value.trim()
   if (!text || busy.value) return
-  if (!apiKey()) { err.value = 'Нет API-ключа — укажи его в окне ?.'; return }
+  if (!apiKey()) { err.value = `Нет API-ключа для ${cur().name} — укажи его в окне ?.`; return }
   input.value = ''; err.value = ''
   const c = conv.value || newConv(props.item)
   if (!c.title) c.title = text.slice(0, 80)
@@ -70,7 +70,7 @@ const when = t => { const d = new Date(t); return d.toLocaleDateString('ru', { d
 <template>
   <aside class="chat" @keydown.stop>
     <div class="ch">
-      <span class="label">{{ model() }}</span>
+      <span class="label">{{ cur().name }} · {{ model() }}</span>
       <span class="cbtns">
         <button class="cbtn" :class="{ on: showHistory }" @click="showHistory = !showHistory" title="беседы">☰ {{ ai.convs.length }}</button>
         <button class="cbtn" @click="fresh" title="новая беседа">＋</button>
