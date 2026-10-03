@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { store, isDone, reset, cycleTheme } from '../lib/store.js'
+import { store, isDone, reset, cycleTheme, effectiveTheme } from '../lib/store.js'
 
 const props = defineProps({ sections: Array, current: String })
 const emit = defineEmits(['select', 'help'])
@@ -50,7 +50,7 @@ const short = t => t.replace(/\s*\(.*?\)\s*/g, '').trim()
       <span>{{ store.persistent ? 'сохраняется' : 'превью: не сохраняется' }}</span>
       <span style="display:flex;gap:12px;align-items:center">
         <button @click="confirm('Сбросить все отметки?') && reset()">сбросить</button>
-        <button class="theme" @click="cycleTheme()" :title="'тема: ' + ({ system: 'системная', light: 'светлая', dark: 'тёмная' })[store.theme] + ' (t)'">{{ ({ system: '◐', light: '○', dark: '●' })[store.theme] }}</button>
+        <button class="theme" @click="cycleTheme()" :title="(effectiveTheme() === 'dark' ? 'тёмная' : 'светлая') + ' тема (t)'">{{ effectiveTheme() === 'dark' ? '●' : '○' }}</button>
         <button class="help" @click="emit('help')">?</button>
       </span>
     </div>

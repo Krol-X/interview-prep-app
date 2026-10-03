@@ -67,11 +67,12 @@ export function importState(mode = 'merge') {
   })
 }
 
-// тема: system (по умолчанию) → light → dark
-const THEMES = ['system', 'light', 'dark']
+// тема: пока не трогали — системная; кнопка переключает light ↔ dark (стартуя от текущей системной)
+const systemDark = () => matchMedia('(prefers-color-scheme: dark)').matches
+export const effectiveTheme = () => store.theme === 'system' ? (systemDark() ? 'dark' : 'light') : store.theme
 function applyTheme() {
   if (store.theme === 'system') document.documentElement.removeAttribute('data-theme')
   else document.documentElement.setAttribute('data-theme', store.theme)
 }
 watch(() => store.theme, applyTheme, { immediate: true })
-export function cycleTheme() { store.theme = THEMES[(THEMES.indexOf(store.theme) + 1) % THEMES.length] }
+export function cycleTheme() { store.theme = effectiveTheme() === 'dark' ? 'light' : 'dark' }

@@ -29,7 +29,7 @@ const emit = defineEmits(['close', 'export', 'import'])
         <tr><td><kbd>e</kbd></td><td>экспорт отметок в файл</td></tr>
         <tr><td><kbd>i</kbd></td><td>импорт из файла (объединяется с текущими)</td></tr>
         <tr><td><kbd>a</kbd></td><td>спросить нейросеть по открытой карточке</td></tr>
-        <tr><td><kbd>t</kbd></td><td>тема: системная → светлая → тёмная</td></tr>
+        <tr><td><kbd>t</kbd></td><td>светлая / тёмная тема</td></tr>
       </table>
       <div class="io">
         <span class="label">Прогресс · {{ count }} отмечено</span>
