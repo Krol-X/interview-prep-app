@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { sections, allItems, renderInline } from './lib/content.js'
-import { store, toggle, isDone, reset, exportState, importState } from './lib/store.js'
+import { store, toggle, isDone, reset, exportState, importState, cycleTheme } from './lib/store.js'
 import Sidebar from './components/Sidebar.vue'
 import ItemList from './components/ItemList.vue'
 import Detail from './components/Detail.vue'
@@ -78,6 +78,7 @@ function onKey(e) {
   else if (k === 'Escape') { if (ai.open) ai.open = false; else if (drawerOpen.value) drawerOpen.value = false; else closeItem() }
   else if (k === 'r') { if (confirm('Сбросить все отметки?')) reset() }
   else if (k === 'e') exportState()
+  else if (k === 't') cycleTheme()
   else if (k === 'a') { if (current.value) ai.open = !ai.open }
   else if (k === 'i') doImport()
   else if (/^Digit[1-9]$/.test(e.code)) {

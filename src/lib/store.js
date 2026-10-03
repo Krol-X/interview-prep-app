@@ -18,11 +18,12 @@ export const store = reactive({
   hotOnly: !!saved.hotOnly,
   hideDone: !!saved.hideDone,
   query: '',
+  theme: saved.theme || 'system',   // system | light | dark
   persistent: ls.ok(),
 })
 
 watch(
-  () => ({ done: store.done, section: store.section, item: store.item, hotOnly: store.hotOnly, hideDone: store.hideDone }),
+  () => ({ done: store.done, section: store.section, item: store.item, hotOnly: store.hotOnly, hideDone: store.hideDone, theme: store.theme }),
   v => ls.set(KEY, JSON.stringify(v)),
   { deep: true },
 )
@@ -65,3 +66,12 @@ export function importState(mode = 'merge') {
     input.click()
   })
 }
+
+// тема: system (по умолчанию) → light → dark
+const THEMES = ['system', 'light', 'dark']
+function applyTheme() {
+  if (store.theme === 'system') document.documentElement.removeAttribute('data-theme')
+  else document.documentElement.setAttribute('data-theme', store.theme)
+}
+watch(() => store.theme, applyTheme, { immediate: true })
+export function cycleTheme() { store.theme = THEMES[(THEMES.indexOf(store.theme) + 1) % THEMES.length] }
