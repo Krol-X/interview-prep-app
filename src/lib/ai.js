@@ -7,13 +7,15 @@ const ls = {   // localStorage может быть недоступен (sandbox
   set(k, v) { try { localStorage.setItem(k, v) } catch { mem[k] = v } },
 }
 const saved = JSON.parse(ls.get(KEY) || '{}')
-// /ai/<id>/* проксируется на upstream (render.yaml routes + vite proxy)
+// Все API отдают CORS — в проде ходим напрямую. В dev — через vite-прокси /ai/<id>/* (превью режет Authorization).
+const DEV = import.meta.env.DEV
 export const PROVIDERS = {
-  gemini:   { name: 'Gemini',   base: '/ai/gemini/v1beta/openai', model: 'gemini-3.5-flash-lite',   keys: 'aistudio.google.com/apikey' },
-  groq:     { name: 'Groq',     base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile', keys: 'console.groq.com/keys' },
-  cerebras: { name: 'Cerebras', base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',            keys: 'cloud.cerebras.ai' },
-  mistral:  { name: 'Mistral',  base: '/ai/mistral/v1',           model: 'ministral-14b-latest',     keys: 'console.mistral.ai/api-keys' },
+  gemini:   { name: 'Gemini',   host: 'https://generativelanguage.googleapis.com', path: '/v1beta/openai', model: 'gemini-3.5-flash-lite',   keys: 'aistudio.google.com/apikey' },
+  groq:     { name: 'Groq',     host: 'https://api.groq.com',                      path: '/openai/v1',     model: 'llama-3.3-70b-versatile', keys: 'console.groq.com/keys' },
+  cerebras: { name: 'Cerebras', host: 'https://api.cerebras.ai',                   path: '/v1',            model: 'gpt-oss-120b',            keys: 'cloud.cerebras.ai' },
+  mistral:  { name: 'Mistral',  host: 'https://api.mistral.ai',                    path: '/v1',            model: 'ministral-14b-latest',    keys: 'console.mistral.ai/api-keys' },
 }
+for (const [id, p] of Object.entries(PROVIDERS)) p.base = (DEV ? `/ai/${id}` : p.host) + p.path
 const CKEY = 'prep-ai-convs'
 
 export const ai = reactive({
@@ -67,11 +69,10 @@ ${plain}
 // стриминг через OpenAI-совместимый chat/completions; onDelta(text) вызывается по мере прихода
 export async function chat(messages, onDelta, signal) {
   const key = apiKey()
-  // ключ дублируем: Authorization (прод), x-prep-key (dev-прокси превращает его в Authorization — превью режет Authorization)
   const url = `${cur().base}/chat/completions`
-  const res = await fetch(url, {
-    method: 'POST', signal,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, 'x-prep-key': key },
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }
+  if (DEV) headers['x-prep-key'] = key   // dev-прокси превращает в Authorization (превью режет его)
+  const res = await fetch(url, { method: 'POST', signal, headers,
     body: JSON.stringify({ model: model(), messages, stream: true }),
   })
   if (!res.ok) {
@@ -84,7 +85,7 @@ export async function chat(messages, onDelta, signal) {
   }
   const ct = res.headers.get('content-type') || ''
   if (!res.body || (!ct.includes('event-stream') && !ct.includes('json')))
-    throw new Error('пустой ответ от /ai/* — на хостинге не настроен rewrite-прокси к API (Render → Settings → Redirects/Rewrites)')
+    throw new Error('пустой ответ от API')
   const reader = res.body.getReader(), dec = new TextDecoder()
   let buf = '', got = false
   for (;;) {

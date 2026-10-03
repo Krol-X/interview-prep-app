@@ -4,11 +4,6 @@ services:
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    routes:
-      - { type: rewrite, source: /ai/gemini/*,   destination: https://generativelanguage.googleapis.com/* }
-      - { type: rewrite, source: /ai/groq/*,     destination: https://api.groq.com/* }
-      - { type: rewrite, source: /ai/cerebras/*, destination: https://api.cerebras.ai/* }
-      - { type: rewrite, source: /ai/mistral/*,  destination: https://api.mistral.ai/* }
     headers:
       - path: /*
         name: Cache-Control
