@@ -2,14 +2,24 @@ import { reactive } from 'vue'
 
 const KEY = 'prep-ai'
 const saved = JSON.parse(localStorage.getItem(KEY) || '{}')
+// пути /ai/<id>/* проксируются на upstream (render.yaml routes + vite proxy)
+export const PROVIDERS = {
+  gemini:   { name: 'Gemini',        base: '/ai/gemini/v1beta/openai', model: 'gemini-2.5-flash',          keys: 'aistudio.google.com/apikey' },
+  groq:     { name: 'Groq',          base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile',   keys: 'console.groq.com/keys' },
+  cerebras: { name: 'Cerebras',      base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',              keys: 'cloud.cerebras.ai' },
+  mistral:  { name: 'Mistral',       base: '/ai/mistral/v1',           model: 'mistral-small-latest',      keys: 'console.mistral.ai/api-keys' },
+  zen:      { name: 'OpenCode Zen',  base: '/ai/zen/v1',               model: 'deepseek-v4-flash',         keys: 'opencode.ai → Keys' },
+}
 export const ai = reactive({
-  apiKey: saved.apiKey || '',
-  model: saved.model || 'big-pickle',
+  provider: saved.provider || 'gemini',
+  keys: saved.keys || {},        // provider -> apiKey
+  models: saved.models || {},    // provider -> model override
   open: false,
 })
-export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ apiKey: ai.apiKey, model: ai.model })) }
-
-const BASE = '/zen/v1'   // проксируется на https://opencode.ai/zen/v1 (render.yaml / vite proxy)
+export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models })) }
+export const cur = () => PROVIDERS[ai.provider] || PROVIDERS.gemini
+export const apiKey = () => ai.keys[ai.provider] || ''
+export const model = () => ai.models[ai.provider] || cur().model
 
 export function systemPrompt(item) {
   const plain = item.body.replace(/\s+\n/g, '\n')
@@ -29,10 +39,10 @@ ${plain}
 
 // стриминг через OpenAI-совместимый chat/completions; onDelta(text) вызывается по мере прихода
 export async function chat(messages, onDelta, signal) {
-  const res = await fetch(`${BASE}/chat/completions`, {
+  const res = await fetch(`${cur().base}/chat/completions`, {
     method: 'POST', signal,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ai.apiKey}` },
-    body: JSON.stringify({ model: ai.model, messages, stream: true }),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey()}` },
+    body: JSON.stringify({ model: model(), messages, stream: true }),
   })
   if (!res.ok) {
     let msg = `${res.status}`

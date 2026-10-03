@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, nextTick } from 'vue'
 import { marked } from 'marked'
-import { ai, chat, systemPrompt, saveAi } from '../lib/ai.js'
+import { ai, chat, systemPrompt, cur, apiKey, model } from '../lib/ai.js'
 
 const props = defineProps({ item: Object })
 const emit = defineEmits(['close'])
@@ -30,7 +30,7 @@ function scroll() { nextTick(() => { if (log.value) log.value.scrollTop = log.va
 async function send(text) {
   text = (text ?? input.value).trim()
   if (!text || busy.value) return
-  if (!ai.apiKey) { err.value = 'Нет API-ключа — укажи его в окне ? (OpenCode Zen).'; return }
+  if (!apiKey()) { err.value = `Нет API-ключа для ${cur().name} — укажи его в окне ?.`; return }
   input.value = ''; err.value = ''
   msgs.value.push({ role: 'user', content: text })
   const reply = { role: 'assistant', content: '' }
@@ -54,7 +54,7 @@ const md = s => marked.parse(s)
 <template>
   <aside class="chat" @keydown.stop>
     <div class="ch">
-      <span class="label">спросить · {{ ai.model }}</span>
+      <span class="label">спросить · {{ cur().name }} · {{ model() }}</span>
       <span>
         <button v-if="msgs.length" class="cbtn" @click="msgs = []">очистить</button>
         <button class="cbtn" @click="emit('close')">esc</button>
