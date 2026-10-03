@@ -18,7 +18,7 @@ export const ai = reactive({
 })
 export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models })) }
 export const cur = () => PROVIDERS[ai.provider] || PROVIDERS.gemini
-export const apiKey = () => ai.keys[ai.provider] || ''
+export const apiKey = () => (ai.keys[ai.provider] || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок попадают только печатные ASCII
 export const model = () => ai.models[ai.provider] || cur().model
 
 export function systemPrompt(item) {
