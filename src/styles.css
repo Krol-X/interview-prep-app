@@ -170,7 +170,6 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .ch { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .cbtn { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 2px 8px; color: var(--fg); background: none; cursor: pointer; }
 .cbtn:hover { border-color: var(--fg); } .cbtn:disabled { opacity: .4; cursor: default; }
-.cquick { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--line); }
 .clog { flex: 1; overflow: auto; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; }
 .chint, .cerr { color: var(--mute); font-size: 12.5px; } .cerr { color: #b33; margin-top: 8px; white-space: pre-wrap; }
 .cmsg { margin-bottom: 12px; } .cmsg.user .ctext { background: var(--soft); border-radius: 4px; padding: 6px 10px; white-space: pre-wrap; }
@@ -181,6 +180,17 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .aiset { padding: 10px 16px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; }
 .aiset input { font: 12px var(--mono); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; outline: none; width: 100%; }
 .aiset .label { grid-column: 1 / -1; }
-.aiset select { font: 12px var(--mono); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; }
 .aiset small { grid-column: 1 / -1; color: var(--mute); font-size: 11.5px; }
 @media (max-width: 900px) { .chat { width: 100vw; } }
+
+.cbtns { display: flex; gap: 6px; } .cbtn.on { border-color: var(--fg); }
+.csend { font-size: 15px; line-height: 1; padding: 6px 10px; } .csend.stop { color: #b33; border-color: #b33; }
+.clist { flex: 1; overflow: auto; padding: 6px 0; }
+.crow { position: relative; padding: 8px 36px 8px 14px; cursor: pointer; border-bottom: 1px solid var(--line); }
+.crow:hover, .crow.on { background: var(--soft); }
+.ctitle { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.csub { display: flex; justify-content: space-between; gap: 8px; margin-top: 2px; font-size: 11.5px; color: var(--mute); }
+.csub > span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cwhen { flex: none; font-family: var(--mono); }
+.cdel { position: absolute; right: 10px; top: 8px; color: var(--mute); font-size: 15px; background: none; border: 0; cursor: pointer; } .cdel:hover { color: #b33; }
+.cctx { padding: 6px 14px; font-size: 11.5px; color: var(--mute); border-bottom: 1px solid var(--line); }

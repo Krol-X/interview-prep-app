@@ -2,24 +2,38 @@ import { reactive } from 'vue'
 
 const KEY = 'prep-ai'
 const saved = JSON.parse(localStorage.getItem(KEY) || '{}')
-// пути /ai/<id>/* проксируются на upstream (render.yaml routes + vite proxy)
-export const PROVIDERS = {
-  gemini:   { name: 'Gemini',        base: '/ai/gemini/v1beta/openai', model: 'gemini-flash-latest',         keys: 'aistudio.google.com/apikey' },
-  groq:     { name: 'Groq',          base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile',   keys: 'console.groq.com/keys' },
-  cerebras: { name: 'Cerebras',      base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',              keys: 'cloud.cerebras.ai' },
-  mistral:  { name: 'Mistral',       base: '/ai/mistral/v1',           model: 'mistral-small-latest',      keys: 'console.mistral.ai/api-keys' },
-  zen:      { name: 'OpenCode Zen',  base: '/ai/zen/v1',               model: 'deepseek-v4-flash',         keys: 'opencode.ai → Keys' },
-}
+// /ai/gemini/* проксируется на generativelanguage.googleapis.com (render.yaml routes + vite proxy)
+const BASE = '/ai/gemini/v1beta/openai'
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
+const CKEY = 'prep-ai-convs'
+
 export const ai = reactive({
-  provider: saved.provider || 'gemini',
-  keys: saved.keys || {},        // provider -> apiKey
-  models: saved.models || {},    // provider -> model override
+  apiKey: saved.apiKey || saved.keys?.gemini || '',
+  model: saved.model || saved.models?.gemini || '',
   open: false,
+  convs: JSON.parse(localStorage.getItem(CKEY) || '[]'),   // [{id, item, title, msgs:[{role,content}], at}]
+  active: null,                                             // id активной беседы
 })
-export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ provider: ai.provider, keys: ai.keys, models: ai.models })) }
-export const cur = () => PROVIDERS[ai.provider] || PROVIDERS.gemini
-export const apiKey = () => (ai.keys[ai.provider] || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок попадают только печатные ASCII
-export const model = () => ai.models[ai.provider] || cur().model
+export function saveAi() { localStorage.setItem(KEY, JSON.stringify({ apiKey: ai.apiKey, model: ai.model })) }
+export function saveConvs() {
+  ai.convs.sort((a, b) => b.at - a.at); ai.convs.splice(60)
+  localStorage.setItem(CKEY, JSON.stringify(ai.convs))
+}
+export const apiKey = () => (ai.apiKey || '').replace(/[^\x21-\x7e]/g, '')  // в заголовок — только печатные ASCII
+export const model = () => ai.model || DEFAULT_MODEL
+
+export function newConv(item) {
+  const c = { id: Date.now().toString(36), item: item.id, title: '', msgs: [], at: Date.now() }
+  ai.convs.unshift(c); ai.active = c.id
+  return c
+}
+export function activeConv() { return ai.convs.find(c => c.id === ai.active) || null }
+export function deleteConv(id) {
+  const i = ai.convs.findIndex(c => c.id === id)
+  if (i >= 0) ai.convs.splice(i, 1)
+  if (ai.active === id) ai.active = null
+  saveConvs()
+}
 
 export function systemPrompt(item) {
   const plain = item.body.replace(/\s+\n/g, '\n')
@@ -41,7 +55,7 @@ ${plain}
 export async function chat(messages, onDelta, signal) {
   const key = apiKey()
   // ключ дублируем: Authorization (прод), x-prep-key (dev-прокси превращает его в Authorization — превью режет Authorization)
-  const url = `${cur().base}/chat/completions`
+  const url = `${BASE}/chat/completions`
   const res = await fetch(url, {
     method: 'POST', signal,
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, 'x-prep-key': key },

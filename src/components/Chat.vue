@@ -1,80 +1,115 @@
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { marked } from 'marked'
-import { ai, chat, systemPrompt, cur, apiKey, model } from '../lib/ai.js'
+import { allItems, renderInline } from '../lib/content.js'
+import { ai, chat, systemPrompt, model, apiKey, newConv, activeConv, deleteConv, saveConvs } from '../lib/ai.js'
 
 const props = defineProps({ item: Object })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'open'])
 
-const msgs = ref([])          // {role, content}
 const input = ref('')
 const busy = ref(false)
 const err = ref('')
+const showHistory = ref(false)
 const log = ref(null)
 const ta = ref(null)
 let ctrl = null
 
-watch(() => props.item?.id, () => { msgs.value = []; err.value = ''; stop() })
-nextTick(() => ta.value?.focus())
+const conv = computed(() => activeConv())
+const convItem = computed(() => conv.value ? allItems.find(i => i.id === conv.value.item) : null)
+const itemTitle = id => { const it = allItems.find(i => i.id === id); return it ? renderInline(it.title) : id }
 
-const quick = [
-  ['проще', 'Объясни суть этой карточки проще, через аналогию с веб-разработкой, в 5–7 предложениях.'],
-  ['спроси меня', 'Ты интервьюер. Задай мне один вопрос по этой карточке, какой реально могут задать на собеседовании. Жди моего ответа, потом оцени его и задай следующий.'],
-  ['ловушки', 'Какие уточняющие вопросы-ловушки интервьюер может задать по этой теме и как на них коротко отвечать?'],
-  ['по-английски', 'Сформулируй краткий ответ по этой карточке на английском (3–5 предложений), как я бы сказал на собеседовании. Простая лексика уровня B1.'],
-]
+// при открытии / смене карточки — продолжаем последнюю беседу по этой карточке или начинаем новую
+function ensureConv() {
+  if (conv.value && conv.value.item === props.item?.id) return
+  const last = ai.convs.find(c => c.item === props.item?.id)
+  ai.active = last ? last.id : null
+}
+watch(() => props.item?.id, () => { stop(); ensureConv(); showHistory.value = false }, { immediate: true })
+nextTick(() => ta.value?.focus())
 
 function stop() { ctrl?.abort(); ctrl = null; busy.value = false }
 function scroll() { nextTick(() => { if (log.value) log.value.scrollTop = log.value.scrollHeight }) }
+function fresh() { ai.active = null; showHistory.value = false; err.value = ''; ta.value?.focus() }
+function pick(c) {
+  ai.active = c.id; showHistory.value = false
+  if (c.item !== props.item?.id) emit('open', c.item)   // контекст беседы = её карточка
+  scroll()
+}
+function remove(c) { deleteConv(c.id) }
 
-async function send(text) {
-  text = (text ?? input.value).trim()
+async function send() {
+  const text = input.value.trim()
   if (!text || busy.value) return
-  if (!apiKey()) { err.value = `Нет API-ключа для ${cur().name} — укажи его в окне ?.`; return }
+  if (!apiKey()) { err.value = 'Нет API-ключа — укажи его в окне ?.'; return }
   input.value = ''; err.value = ''
-  msgs.value.push({ role: 'user', content: text })
+  const c = conv.value || newConv(props.item)
+  if (!c.title) c.title = text.slice(0, 80)
+  c.msgs.push({ role: 'user', content: text })
   const reply = { role: 'assistant', content: '' }
-  msgs.value.push(reply)
+  c.msgs.push(reply); c.at = Date.now()
   busy.value = true; ctrl = new AbortController(); scroll()
   try {
-    const history = [{ role: 'system', content: systemPrompt(props.item) }, ...msgs.value.slice(0, -1)]
+    const ctxItem = allItems.find(i => i.id === c.item) || props.item
+    const history = [{ role: 'system', content: systemPrompt(ctxItem) }, ...c.msgs.slice(0, -1)]
     await chat(history, d => { reply.content += d; scroll() }, ctrl.signal)
   } catch (e) {
     if (e.name !== 'AbortError') err.value = e.message
-    if (!reply.content) msgs.value.pop()
-  } finally { busy.value = false; ctrl = null; ta.value?.focus() }
+    if (!reply.content) c.msgs.pop()
+    if (!c.msgs.length) deleteConv(c.id)
+  } finally { busy.value = false; ctrl = null; saveConvs(); ta.value?.focus() }
 }
 function onKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   if (e.key === 'Escape') { e.target.blur(); emit('close') }
 }
 const md = s => marked.parse(s)
+const when = t => { const d = new Date(t); return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' }) + ' ' + d.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }) }
 </script>
 
 <template>
   <aside class="chat" @keydown.stop>
     <div class="ch">
-      <span class="label">спросить · {{ cur().name }} · {{ model() }}</span>
-      <span>
-        <button v-if="msgs.length" class="cbtn" @click="msgs = []">очистить</button>
+      <span class="label">{{ model() }}</span>
+      <span class="cbtns">
+        <button class="cbtn" :class="{ on: showHistory }" @click="showHistory = !showHistory" title="беседы">☰ {{ ai.convs.length }}</button>
+        <button class="cbtn" @click="fresh" title="новая беседа">＋</button>
         <button class="cbtn" @click="emit('close')">esc</button>
       </span>
     </div>
-    <div class="cquick">
-      <button v-for="[t, p] in quick" :key="t" class="cbtn" :disabled="busy" @click="send(p)">{{ t }}</button>
-    </div>
-    <div class="clog" ref="log">
-      <div v-if="!msgs.length" class="chint">Контекст — открытая карточка. Спроси что угодно по ней или нажми кнопку выше.</div>
-      <div v-for="(m, i) in msgs" :key="i" class="cmsg" :class="m.role">
-        <div v-if="m.role === 'user'" class="ctext">{{ m.content }}</div>
-        <div v-else class="md ctext" v-html="md(m.content || '…')"></div>
+
+    <!-- история бесед -->
+    <div v-if="showHistory" class="clist">
+      <div v-if="!ai.convs.length" class="chint">Бесед пока нет.</div>
+      <div v-for="c in ai.convs" :key="c.id" class="crow" :class="{ on: c.id === ai.active }" @click="pick(c)">
+        <div class="ctitle">{{ c.title || '…' }}</div>
+        <div class="csub"><span v-html="itemTitle(c.item)"></span><span class="cwhen">{{ when(c.at) }}</span></div>
+        <button class="cdel" @click.stop="remove(c)" title="удалить">×</button>
       </div>
-      <div v-if="err" class="cerr">{{ err }}</div>
     </div>
-    <div class="cin">
-      <textarea ref="ta" v-model="input" rows="2" placeholder="вопрос… (enter — отправить, shift+enter — перенос)" @keydown="onKey"></textarea>
-      <button v-if="busy" class="cbtn" @click="stop">стоп</button>
-      <button v-else class="cbtn" :disabled="!input.trim()" @click="send()">↵</button>
-    </div>
+
+    <!-- беседа -->
+    <template v-else>
+      <div class="cctx" v-if="convItem && convItem.id !== item?.id">
+        беседа по карточке: <b v-html="renderInline(convItem.title)"></b>
+      </div>
+      <div class="clog" ref="log">
+        <div v-if="!conv || !conv.msgs.length" class="chint">
+          Контекст — открытая карточка «<span v-html="renderInline(item.title)"></span>». Спроси что угодно по ней.
+        </div>
+        <template v-else>
+          <div v-for="(m, i) in conv.msgs" :key="i" class="cmsg" :class="m.role">
+            <div v-if="m.role === 'user'" class="ctext">{{ m.content }}</div>
+            <div v-else class="md ctext" v-html="md(m.content || '…')"></div>
+          </div>
+        </template>
+        <div v-if="err" class="cerr">{{ err }}</div>
+      </div>
+      <div class="cin">
+        <textarea ref="ta" v-model="input" rows="2" placeholder="вопрос… (enter — отправить, shift+enter — перенос)" @keydown="onKey"></textarea>
+        <button v-if="busy" class="cbtn csend stop" @click="stop" title="остановить">■</button>
+        <button v-else class="cbtn csend" :disabled="!input.trim()" @click="send" title="отправить">➤</button>
+      </div>
+    </template>
   </aside>
 </template>

@@ -110,7 +110,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
       :next="visibleItems[visibleItems.findIndex(i => i.id === store.item) + 1] || null"
       @toggle="toggle(current.id)" @close="closeItem" @open="openItem" @ask="ai.open = !ai.open" />
 
-    <Chat v-if="ai.open && current" :item="current" @close="ai.open = false" />
+    <Chat v-if="ai.open && current" :item="current" @close="ai.open = false" @open="openItem" />
 
     <Help v-if="helpOpen" @close="helpOpen = false" @export="exportState()" @import="helpOpen = false; doImport()" :persistent="store.persistent" :count="Object.keys(store.done).length" />
   </div>
