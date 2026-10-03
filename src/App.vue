@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { sections, allItems, renderInline } from './lib/content.js'
-import { store, toggle, isDone, reset } from './lib/store.js'
+import { store, toggle, isDone, reset, exportState, importState } from './lib/store.js'
 import Sidebar from './components/Sidebar.vue'
 import ItemList from './components/ItemList.vue'
 import Detail from './components/Detail.vue'
@@ -50,6 +50,12 @@ function stepSection(d) {
   store.item = null
 }
 
+async function doImport() {
+  const r = await importState('merge')
+  if (!r) return
+  if (r.error) alert('Не удалось импортировать: ' + r.error)
+  else alert(`Импортировано ${r.imported} отметок (было ${r.before}, стало ${r.after}).`)
+}
 function onKey(e) {
   if (e.ctrlKey || e.metaKey || e.altKey) return
   if (helpOpen.value) { if (e.key === 'Escape' || e.key === '?') helpOpen.value = false; return }
@@ -68,6 +74,8 @@ function onKey(e) {
   else if (k === '?') { helpOpen.value = true; e.preventDefault() }
   else if (k === 'Escape') { if (drawerOpen.value) drawerOpen.value = false; else closeItem() }
   else if (k === 'r') { if (confirm('Сбросить все отметки?')) reset() }
+  else if (k === 'e') exportState()
+  else if (k === 'i') doImport()
   else if (/^Digit[1-9]$/.test(e.code)) {
     const n = +e.code.slice(5) - 1 + (e.shiftKey ? 9 : 0)
     if (sections[n]) { store.section = sections[n].id; store.item = null }
@@ -98,6 +106,6 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
       :next="visibleItems[visibleItems.findIndex(i => i.id === store.item) + 1] || null"
       @toggle="toggle(current.id)" @close="closeItem" @open="openItem" />
 
-    <Help v-if="helpOpen" @close="helpOpen = false" :persistent="store.persistent" />
+    <Help v-if="helpOpen" @close="helpOpen = false" @export="exportState()" @import="helpOpen = false; doImport()" :persistent="store.persistent" :count="Object.keys(store.done).length" />
   </div>
 </template>

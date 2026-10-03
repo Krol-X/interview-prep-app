@@ -1,6 +1,6 @@
 <script setup>
-defineProps({ persistent: Boolean })
-const emit = defineEmits(['close'])
+defineProps({ persistent: Boolean, count: Number })
+const emit = defineEmits(['close', 'export', 'import'])
 </script>
 
 <template>
@@ -25,7 +25,16 @@ const emit = defineEmits(['close'])
         <tr><th>Прочее</th></tr>
         <tr><td><kbd>?</kbd></td><td>это окно</td></tr>
         <tr><td><kbd>r</kbd></td><td>сбросить все отметки</td></tr>
+        <tr><td><kbd>e</kbd></td><td>экспорт отметок в файл</td></tr>
+        <tr><td><kbd>i</kbd></td><td>импорт из файла (объединяется с текущими)</td></tr>
       </table>
+      <div class="io">
+        <span class="label">Прогресс · {{ count }} отмечено</span>
+        <span class="io-btns">
+          <button @click="emit('export')">↓ экспорт</button>
+          <button @click="emit('import')">↑ импорт</button>
+        </span>
+      </div>
       <div class="mf">
         Один пункт = один файл <code>content/&lt;раздел&gt;/&lt;пункт&gt;.md</code>. Точкой помечены важные (<code>hot: true</code>).
         <template v-if="!persistent"><br>В превью отметки не сохраняются (sandbox).</template>

@@ -159,3 +159,8 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
   .dhead { padding: calc(10px + env(safe-area-inset-top)) 12px 10px; }
   .dhead h1 { font-size: 16px; }
 }
+
+.io { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--line); margin-top: 8px; }
+.io-btns { display: flex; gap: 6px; }
+.io button { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 3px 10px; color: var(--fg); background: none; cursor: pointer; }
+.io button:hover { border-color: var(--fg); }
