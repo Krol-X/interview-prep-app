@@ -4,7 +4,7 @@ const KEY = 'prep-ai'
 const saved = JSON.parse(localStorage.getItem(KEY) || '{}')
 // пути /ai/<id>/* проксируются на upstream (render.yaml routes + vite proxy)
 export const PROVIDERS = {
-  gemini:   { name: 'Gemini',        base: '/ai/gemini/v1beta/openai', model: 'gemini-2.5-flash',          keys: 'aistudio.google.com/apikey' },
+  gemini:   { name: 'Gemini',        base: '/ai/gemini/v1beta/openai', model: 'gemini-flash-latest',         keys: 'aistudio.google.com/apikey' },
   groq:     { name: 'Groq',          base: '/ai/groq/openai/v1',       model: 'llama-3.3-70b-versatile',   keys: 'console.groq.com/keys' },
   cerebras: { name: 'Cerebras',      base: '/ai/cerebras/v1',          model: 'gpt-oss-120b',              keys: 'cloud.cerebras.ai' },
   mistral:  { name: 'Mistral',       base: '/ai/mistral/v1',           model: 'mistral-small-latest',      keys: 'console.mistral.ai/api-keys' },
@@ -46,7 +46,10 @@ export async function chat(messages, onDelta, signal) {
   })
   if (!res.ok) {
     let msg = `${res.status}`
-    try { msg += ' ' + (await res.json()).error?.message } catch {}
+    try {
+      let j = await res.json(); if (Array.isArray(j)) j = j[0]
+      msg += ' ' + (j?.error?.message || j?.message || j?.detail || JSON.stringify(j).slice(0, 200))
+    } catch {}
     throw new Error(msg)
   }
   const reader = res.body.getReader(), dec = new TextDecoder()
