@@ -47,9 +47,8 @@ const short = t => t.replace(/\s*\(.*?\)\s*/g, '').trim()
       </template>
     </nav>
     <div class="foot">
-      <span>{{ store.persistent ? 'сохраняется' : 'превью: не сохраняется' }}</span>
+      <button @click="confirm('Сбросить все отметки?') && reset()">сбросить</button>
       <span style="display:flex;gap:12px;align-items:center">
-        <button @click="confirm('Сбросить все отметки?') && reset()">сбросить</button>
         <button class="theme" @click="cycleTheme()" :title="(effectiveTheme() === 'dark' ? 'тёмная' : 'светлая') + ' тема (t)'">{{ effectiveTheme() === 'dark' ? '●' : '○' }}</button>
         <button class="help" @click="emit('help')">?</button>
       </span>
