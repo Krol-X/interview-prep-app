@@ -1,13 +1,13 @@
 :root {
-  --bg: #fff; --fg: #111; --mute: #777; --line: #e3e3e3; --soft: #f5f5f4; --code: #f1f1f0;
+  --bg: #f4f4f2; --fg: #1c1c1c; --mute: #747474; --line: #dcdcd8; --soft: #eaeae6; --code: #e8e8e4; --bubble: #3a3a3a; --bubble-fg: #f4f4f2;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --sans: -apple-system, system-ui, "Segoe UI", Inter, Roboto, sans-serif;
   --side: 250px; --list: 360px; --ovl: rgba(0,0,0,.25);
 }
-:root[data-theme="dark"] { --bg: #0f0f0f; --fg: #e8e8e8; --mute: #8a8a8a; --line: #262626; --soft: #171717; --code: #1b1b1b; --ovl: rgba(0,0,0,.55); color-scheme: dark; }
+:root[data-theme="dark"] { --bg: #0f0f0f; --fg: #e8e8e8; --mute: #8a8a8a; --line: #262626; --soft: #171717; --code: #1b1b1b; --ovl: rgba(0,0,0,.55); --bubble: #2c2c2c; --bubble-fg: #e8e8e8; color-scheme: dark; }
 :root[data-theme="light"] { color-scheme: light; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0f0f0f; --fg: #e8e8e8; --mute: #8a8a8a; --line: #262626; --soft: #171717; --code: #1b1b1b; --ovl: rgba(0,0,0,.55); color-scheme: dark; }
+  :root:not([data-theme="light"]) { --bg: #0f0f0f; --fg: #e8e8e8; --mute: #8a8a8a; --line: #262626; --soft: #171717; --code: #1b1b1b; --ovl: rgba(0,0,0,.55); --bubble: #2c2c2c; --bubble-fg: #e8e8e8; color-scheme: dark; }
 }
 * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -191,7 +191,7 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .chint, .cerr { color: var(--mute); font-size: 12.5px; } .cerr { color: #b33; margin-top: 8px; white-space: pre-wrap; }
 .cmsg { margin-bottom: 14px; }
 .cmsg.user { display: flex; justify-content: flex-end; }
-.cmsg.user .ctext { max-width: 88%; background: var(--fg); color: var(--bg); border-radius: 10px 10px 2px 10px; padding: 7px 12px; white-space: pre-wrap; font-size: 13.5px; }
+.cmsg.user .ctext { max-width: 88%; background: var(--bubble); color: var(--bubble-fg); border-radius: 10px 10px 2px 10px; padding: 7px 12px; white-space: pre-wrap; font-size: 13.5px; }
 .cmsg.assistant .ctext { padding-left: 10px; border-left: 2px solid var(--line); }
 .cmsg.assistant .ctext > :first-child { margin-top: 0; } .cmsg.assistant .ctext > :last-child { margin-bottom: 0; }
 .cin { display: flex; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--line); align-items: flex-end; }
