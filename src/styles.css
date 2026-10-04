@@ -189,7 +189,10 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .cbtn:hover { border-color: var(--fg); } .cbtn:disabled { opacity: .4; cursor: default; }
 .clog { flex: 1; overflow: auto; padding: 12px 14px; font-size: 13.5px; line-height: 1.5; }
 .chint, .cerr { color: var(--mute); font-size: 12.5px; } .cerr { color: #b33; margin-top: 8px; white-space: pre-wrap; }
-.cmsg { margin-bottom: 12px; } .cmsg.user .ctext { background: var(--soft); border-radius: 4px; padding: 6px 10px; white-space: pre-wrap; }
+.cmsg { margin-bottom: 14px; }
+.cmsg.user { display: flex; justify-content: flex-end; }
+.cmsg.user .ctext { max-width: 88%; background: var(--fg); color: var(--bg); border-radius: 10px 10px 2px 10px; padding: 7px 12px; white-space: pre-wrap; font-size: 13.5px; }
+.cmsg.assistant .ctext { padding-left: 10px; border-left: 2px solid var(--line); }
 .cmsg.assistant .ctext > :first-child { margin-top: 0; } .cmsg.assistant .ctext > :last-child { margin-bottom: 0; }
 .cin { display: flex; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--line); align-items: flex-end; }
 .cin textarea { flex: 1; resize: none; font: 13.5px var(--sans); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; outline: none; }
@@ -216,3 +219,4 @@ mark { background: none; color: inherit; text-decoration: underline; text-underl
 .aiset select { font: 12px var(--mono); color: var(--fg); background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; }
 .theme { width: 24px; height: 24px; border: 1px solid var(--line); border-radius: 50%; font-size: 12px; line-height: 1; flex: none; color: var(--mute); }
 .theme:hover { border-color: var(--fg); color: var(--fg); }
+.dlink { border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; font-size: 13px; margin-right: 6px; color: var(--mute); } .dlink:hover { border-color: var(--fg); color: var(--fg); }

@@ -60,7 +60,7 @@ async function send() {
   } finally { busy.value = false; ctrl = null; saveConvs(); ta.value?.focus() }
 }
 function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send() }
   if (e.key === 'Escape') { e.target.blur(); emit('close') }
 }
 const md = s => marked.parse(s)
@@ -117,7 +117,7 @@ const when = t => { const d = new Date(t); return d.toLocaleDateString('ru', { d
         <div v-if="err" class="cerr">{{ err }}</div>
       </div>
       <div class="cin">
-        <textarea ref="ta" v-model="input" rows="2" placeholder="вопрос… (enter — отправить, shift+enter — перенос)" @keydown="onKey"></textarea>
+        <textarea ref="ta" v-model="input" rows="2" placeholder="вопрос… (ctrl+enter — отправить)" @keydown="onKey"></textarea>
         <button v-if="busy" class="cbtn csend stop" @click="stop" title="остановить">■</button>
         <button v-else class="cbtn csend" :disabled="!input.trim()" @click="send" title="отправить">➤</button>
       </div>

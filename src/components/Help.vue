@@ -28,7 +28,7 @@ const emit = defineEmits(['close', 'export', 'import'])
         <tr><td><kbd>r</kbd></td><td>сбросить все отметки</td></tr>
         <tr><td><kbd>e</kbd></td><td>экспорт отметок в файл</td></tr>
         <tr><td><kbd>i</kbd></td><td>импорт из файла (объединяется с текущими)</td></tr>
-        <tr><td><kbd>a</kbd></td><td>спросить нейросеть по открытой карточке</td></tr>
+        <tr><td><kbd>a</kbd></td><td>спросить нейросеть по открытой карточке (<kbd>ctrl</kbd>+<kbd>enter</kbd> — отправить)</td></tr>
         <tr><td><kbd>t</kbd></td><td>светлая / тёмная тема</td></tr>
       </table>
       <div class="io">

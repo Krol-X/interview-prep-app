@@ -12,6 +12,20 @@ import { ai } from './lib/ai.js'
 const helpOpen = ref(false)
 const drawerOpen = ref(false)
 
+// адрес страницы: #/<раздел>  или  #/<раздел>/<пункт> — можно шарить
+function readHash() {
+  const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''))
+  if (!h) return
+  const it = allItems.find(i => i.id === h)
+  if (it) { store.section = it.section.id; store.item = it.id; return }
+  if (sections.find(s => s.id === h)) { store.section = h; store.item = null }
+}
+readHash()
+window.addEventListener('hashchange', readHash)
+watch(() => [store.section, store.item], ([sec, it]) => {
+  const want = '#/' + (it || sec || '')
+  if (location.hash !== want) history.replaceState(null, '', want)
+})
 if (!store.section || !sections.find(s => s.id === store.section)) store.section = sections[0]?.id
 
 const section = computed(() => sections.find(s => s.id === store.section))
